@@ -42,18 +42,43 @@ class MedicationListScreen extends StatelessWidget {
 
 class MedicationCard extends StatelessWidget {
   final Medication medication;
+  final MedicationController medicationController = Get.find();
 
-  const MedicationCard({super.key, required this.medication});
+  MedicationCard({super.key, required this.medication});
 
   @override
   Widget build(BuildContext context) {
+    final isPastDue = DateTime.now().isAfter(medication.time) && !medication.taken;
+
     return Card(
       margin: const EdgeInsets.all(8.0),
+      color: isPastDue ? Colors.red.shade100 : null,
       child: ListTile(
         title: Text(medication.name),
-        subtitle: Text('Dosis: ${medication.dosage}'),
-        trailing: Text(
-          '${medication.time.hour}:${medication.time.minute.toString().padLeft(2, '0')}',
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Dosis: ${medication.dosage}'),
+            Text(
+              'Hora: ${medication.time.hour.toString().padLeft(2, '0')}:${medication.time.minute.toString().padLeft(2, '0')}',
+            ),
+            Text(
+              medication.taken ? '✅ Tomado' : '⏱️ Pendiente',
+              style: TextStyle(
+                color: medication.taken ? Colors.green : Colors.orange,
+              ),
+            ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: Icon(
+            medication.taken ? Icons.check_box : Icons.check_box_outline_blank,
+            color: medication.taken ? Colors.green : null,
+          ),
+          onPressed: () async {
+            final updated = medication.copyWith(taken: !medication.taken);
+            await medicationController.updateMedication(updated);
+          },
         ),
         onTap: () => Get.toNamed('/edit-medication/${medication.id}'),
       ),
