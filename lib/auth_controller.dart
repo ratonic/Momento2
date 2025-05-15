@@ -13,7 +13,7 @@ class AuthController extends GetxController {
       await account.get();
       return true;
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      // Removemos el Snackbar ya que no es un error real
       return false;
     }
   }
@@ -27,7 +27,7 @@ class AuthController extends GetxController {
       );
       await login(email, password);
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', 'Error al crear la cuenta: ${e.toString()}');
     }
   }
 
@@ -39,9 +39,9 @@ class AuthController extends GetxController {
       );
       final userData = await account.get();
       user.value = userData;
-      Get.toNamed('/medications');
+      Get.offAllNamed('/medications'); // Cambiado de toNamed a offAllNamed
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', 'Error al iniciar sesión: ${e.toString()}');
     }
   }
 
@@ -49,8 +49,9 @@ class AuthController extends GetxController {
     try {
       await account.deleteSession(sessionId: 'current');
       user.value = null;
+      Get.offAllNamed('/login'); // Agregamos esta línea para redirigir al login
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', 'Error al cerrar sesión: ${e.toString()}');
     }
   }
 }

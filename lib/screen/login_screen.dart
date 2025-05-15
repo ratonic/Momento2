@@ -3,12 +3,18 @@ import 'package:get/get.dart';
 
 import 'package:application_medicines/auth_controller.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final AuthController authController = Get.find<AuthController>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  LoginScreen({super.key});
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -18,41 +24,58 @@ class LoginScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Correo Electrónico',
-                border: OutlineInputBorder(),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Correo Electrónico',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su correo electrónico';
+                  }
+                  return null;
+                },
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Contraseña',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su contraseña';
+                  }
+                  return null;
+                },
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () async {
-                await authController.login(
-                  emailController.text,
-                  passwordController.text,
-                );
-              },
-              child: const Text('Iniciar Sesión'),
-            ),
-            TextButton(
-              onPressed: () => Get.toNamed('/register'),
-              child: const Text('¿No tienes cuenta? Regístrate'),
-            ),
-          ],
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await authController.login(
+                      emailController.text,
+                      passwordController.text,
+                    );
+                  }
+                },
+                child: const Text('Iniciar Sesión'),
+              ),
+              TextButton(
+                onPressed: () => Get.toNamed('/register'),
+                child: const Text('¿No tienes cuenta? Regístrate'),
+              ),
+            ],
+          ),
         ),
       ),
     );

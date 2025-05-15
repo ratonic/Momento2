@@ -3,14 +3,19 @@ import 'package:get/get.dart';
 
 import 'package:application_medicines/auth_controller.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final AuthController authController = Get.find<AuthController>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
-
-  RegisterScreen({super.key});
+  final TextEditingController confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -20,58 +25,82 @@ class RegisterScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'Correo Electrónico',
-                border: OutlineInputBorder(),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Correo Electrónico',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su correo electrónico';
+                  }
+                  if (!GetUtils.isEmail(value)) {
+                    return 'Por favor ingrese un correo electrónico válido';
+                  }
+                  return null;
+                },
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Contraseña',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su contraseña';
+                  }
+                  if (value.length < 8) {
+                    return 'La contraseña debe tener al menos 8 caracteres';
+                  }
+                  return null;
+                },
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: confirmPasswordController,
-              decoration: const InputDecoration(
-                labelText: 'Confirmar Contraseña',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: confirmPasswordController,
+                decoration: const InputDecoration(
+                  labelText: 'Confirmar Contraseña',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor confirme su contraseña';
+                  }
+                  if (value != passwordController.text) {
+                    return 'Las contraseñas no coinciden';
+                  }
+                  return null;
+                },
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                if (passwordController.text == confirmPasswordController.text) {
-                  authController.createAccount(
-                    emailController.text,
-                    passwordController.text,
-                  );
-                } else {
-                  Get.snackbar(
-                    'Error',
-                    'Las contraseñas no coinciden',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-              },
-              child: const Text('Registrarse'),
-            ),
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('¿Ya tienes cuenta? Inicia Sesión'),
-            ),
-          ],
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await authController.createAccount(
+                      emailController.text,
+                      passwordController.text,
+                    );
+                  }
+                },
+                child: const Text('Registrarse'),
+              ),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('¿Ya tienes cuenta? Inicia Sesión'),
+              ),
+            ],
+          ),
         ),
       ),
     );

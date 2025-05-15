@@ -7,10 +7,8 @@ import 'package:application_medicines/medication.dart';
 import 'package:application_medicines/notification_service.dart';
 
 class EditMedicationScreen extends StatelessWidget {
-  final MedicationController medicationController =
-      Get.find<MedicationController>();
-  final NotificationService notificationService =
-      Get.find<NotificationService>();
+  final MedicationController medicationController = Get.find<MedicationController>();
+  final NotificationService notificationService = Get.find<NotificationService>();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController dosageController = TextEditingController();
@@ -27,6 +25,35 @@ class EditMedicationScreen extends StatelessWidget {
     selectedTime.value = TimeOfDay.fromDateTime(medication.time);
   }
 
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Eliminación'),
+          content: const Text('¿Estás seguro que deseas eliminar este medicamento?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await medicationController.deleteMedication(medicationId);
+                Navigator.of(context).pop(); // Cierra el diálogo
+                Get.back(); // Regresa a la pantalla anterior
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,8 +61,8 @@ class EditMedicationScreen extends StatelessWidget {
         title: const Text('Editar Medicamento'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {},
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _showDeleteConfirmation(context),
           ),
         ],
       ),
